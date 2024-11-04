@@ -44,7 +44,7 @@ namespace FileCreationFuncApp
             var bcc = sc.blobServiceClient.GetBlobContainerClient(containerName);
             await bcc.CreateIfNotExistsAsync();
 
-            var blobs = bcc.GetBlobsAsync(BlobTraits.All, BlobStates.None, prefix: path);
+            var blobs = bcc.GetBlobsAsync(BlobTraits.All, BlobStates.None, prefix: path);            
 
             await foreach (var blobItem in blobs)
             {
@@ -54,7 +54,8 @@ namespace FileCreationFuncApp
                 string filePath = blobItem.Name[..lastIndex];
 
                 triggerFilePath = $"{filePath}/{triggerFile}";
-                var blob = bcc.UploadBlob(triggerFilePath, Stream.Null);
+                var bc = bcc.GetBlobClient(triggerFilePath);
+                var blob = await bc.UploadAsync(Stream.Null, overwrite: true);
                 isTriggerFile=true;
             }
 
